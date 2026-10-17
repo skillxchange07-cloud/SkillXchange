@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}SkillXchange - The Elite Knowledge Barter Network{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <!-- Immersive Hero Section -->
+    <section class="py-5 overflow-hidden position-relative" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 95vh; display: flex; align-items: center;">
+        <!-- Background accents -->
+        <div class="position-absolute top-0 end-0 p-5 mt-5 opacity-10">
+            <i class="fa-solid fa-cube text-primary" style="font-size: 20rem; transform: rotate(15deg);"></i>
+        </div>
+        
+        <div class="container position-relative">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 text-center text-lg-start">
+                    <span class="badge bg-primary-light rounded-pill px-4 py-2 mb-4 animate__animated animate__fadeInDown fw-700">Verified Knowledge Economy</span>
+                    <h1 class="display-2 fw-800 mb-4 lh-tight">Redefining How <br><span class="text-gradient">Experts Grow.</span></h1>
+                    <p class="lead text-muted mb-5 fs-4">Join an elite peer-to-peer network where skills are the currency. No subscriptions, just pure expertise exchange.</p>
+                    <div class="d-flex gap-3 justify-content-center justify-content-lg-start flex-wrap">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-premium btn-lg rounded-pill px-5 py-3 shadow-lg">Start Exchanging</a>
+                        <a href="{{ url_for('skills.browse_skills') }}" class="btn btn-light btn-lg rounded-pill px-5 py-3 border shadow-sm">Explore Marketplace</a>
+                    </div>
+                    <div class="mt-5 d-flex align-items-center justify-content-center justify-content-lg-start gap-4">
+                        <div class="d-flex -space-x-3">
+                            <div class="user-avatar border-2 border-white shadow-sm" style="width: 40px; height: 40px; background: #4f46e5; color: white;">A</div>
+                            <div class="user-avatar border-2 border-white shadow-sm" style="margin-left: -15px; width: 40px; height: 40px; background: #c026d3; color: white;">B</div>
+                            <div class="user-avatar border-2 border-white shadow-sm" style="margin-left: -15px; width: 40px; height: 40px; background: #10b981; color: white;">C</div>
+                        </div>
+                        <p class="text-muted small mb-0 fw-600">Joined by 12,000+ verified mentors</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="position-relative">
+                        <!-- Glass Mockup Preview -->
+                        <div class="glass-panel p-2 shadow-2xl animate__animated animate__zoomIn border-0 overflow-hidden" style="border-radius: 30px;">
+                            <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=1000" alt="Platform" class="img-fluid rounded-4 shadow-sm">
+                            <div class="position-absolute bottom-0 start-0 m-4 glass-panel p-3 animate__animated animate__fadeInUp delay-1 border-white border-1">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-success rounded-circle pulse" style="width: 12px; height: 12px;"></div>
+                                    <h6 class="fw-bold mb-0 small">Live: 1-on-1 Product Session</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trusted By / Logos -->
+    <section class="py-5 bg-white border-bottom">
+        <div class="container">
+            <p class="text-center text-muted extra-small fw-700 text-uppercase letter-spacing-1 mb-5">Powering Growth for Teams at</p>
+            <div class="d-flex justify-content-center gap-5 flex-wrap grayscale opacity-50">
+                <i class="fa-brands fa-google fs-3"></i>
+                <i class="fa-brands fa-microsoft fs-3"></i>
+                <i class="fa-brands fa-amazon fs-3"></i>
+                <i class="fa-brands fa-apple fs-3"></i>
+                <i class="fa-brands fa-meta fs-3"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Elite Features Grid -->
+    <section class="py-5">
+        <div class="container py-5">
+            <div class="text-center mb-5 pb-4">
+                <h2 class="fw-800 display-5">Built for <span class="text-gradient">Modern Professionals</span></h2>
+                <p class="text-muted lead">Zero friction, maximum impact knowledge exchange.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card glass-panel p-5 h-100 hover-lift text-center border-0 shadow-none">
+                        <div class="bg-primary-light rounded-circle shadow-sm mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                            <i class="fa-solid fa-shield-halved fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Verified Skills</h4>
+                        <p class="text-muted small lh-lg">Every mentor uploads a demo video. Our experts verify proficiency to ensure you learn only the best.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card glass-panel p-5 h-100 hover-lift text-center border-0 shadow-none">
+                        <div class="bg-success-light rounded-circle shadow-sm mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                            <i class="fa-solid fa-bolt fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">AI Matching</h4>
+                        <p class="text-muted small lh-lg">Our smart engine connects your learned goals with mentors' offered expertise automatically.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card glass-panel p-5 h-100 hover-lift text-center border-0 shadow-none">
+                        <div class="bg-warning-light rounded-circle shadow-sm mb-4 mx-auto d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                            <i class="fa-solid fa-video fs-3"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Seamless Live</h4>
+                        <p class="text-muted small lh-lg">Integrated scheduling and video calls. One click to connect, learn, and trade knowledge.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Premium Action -->
+    <section class="py-5">
+        <div class="container">
+            <div class="mesh-gradient p-5 p-md-5 rounded-5 shadow-2xl text-center text-white position-relative overflow-hidden">
+                <div class="position-relative z-index-1 py-4">
+                    <h2 class="display-4 fw-800 mb-4">Start Your Growth Engine</h2>
+                    <p class="lead mb-5 opacity-75 mx-auto" style="max-width: 600px;">Join the world's most innovative peer-to-peer learning network. Trade what you know for what you need.</p>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-white bg-white text-primary btn-lg rounded-pill px-5 py-3 fw-800 shadow-lg">Join the Network</a>
+                </div>
+                <!-- Design deco -->
+                <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" style="background: radial-gradient(circle at 10% 10%, white 0%, transparent 30%);"></div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<footer class="py-5 mt-5 bg-white border-top">
+    <div class="container pt-4">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="fw-800 text-dark display-6 mb-3"><i class="fa-solid fa-cube text-primary me-2"></i> SkillXchange</div>
+                <p class="text-muted small mb-0" style="max-width: 300px;">Empowering professionals through autonomous knowledge bartering. Trade skills, build reputation, grow together.</p>
+            </div>
+            <div class="col-lg-6 text-lg-end">
+                <div class="d-flex gap-4 justify-content-lg-end mb-4">
+                    <a href="#" class="text-muted small text-decoration-none">Terms</a>
+                    <a href="#" class="text-muted small text-decoration-none">Privacy</a>
+                    <a href="#" class="text-muted small text-decoration-none">Security</a>
+                </div>
+                <p class="text-muted extra-small">&copy; 2026 SkillXchange Platform. All Rights Reserved. <br> Powered by Autonomous Peer Network.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .letter-spacing-1 { letter-spacing: 2px; }
+    .pulse { animation: pulse-shadow 2s infinite; }
+    @keyframes pulse-shadow {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .grayscale { filter: grayscale(1); transition: all 0.3s; }
+    .grayscale:hover { filter: grayscale(0); opacity: 1; }
+    .-space-x-3 > * { margin-left: -0.75rem; }
+</style>
+{% endblock %}

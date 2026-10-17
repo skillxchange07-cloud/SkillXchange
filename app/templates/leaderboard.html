@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <div class="mb-5 text-center">
+        <h2 class="fw-bold mb-1">Top Mentors</h2>
+        <p class="text-muted">Celebrating our most active and highly-rated experts.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 p-4 shadow-sm">
+                {% if mentors %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light small text-muted text-uppercase fw-600">
+                                <tr>
+                                    <th class="border-0 px-4">Rank</th>
+                                    <th class="border-0">Mentor</th>
+                                    <th class="border-0">Rating</th>
+                                    <th class="border-0">Reviews</th>
+                                    <th class="border-0 text-end px-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for m in mentors %}
+                                <tr>
+                                    <td class="px-4 py-3 fw-bold text-primary">#{{ loop.index }}</td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar extra-small me-2">{{ m.name[0] }}</div>
+                                            <span class="fw-600">{{ m.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="text-warning">
+                                            <i class="fa-solid fa-star me-1"></i> {{ m.avg_rating | round(1) }}
+                                        </div>
+                                    </td>
+                                    <td class="py-3 text-muted small">{{ m.rating_count }} reviews</td>
+                                    <td class="px-4 py-3 text-end">
+                                        <a href="{{ url_for('auth.mentor_profile', user_id=m.id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Profile</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <p class="text-muted">No rated mentors found yet. Start matching to build the leaderboard!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

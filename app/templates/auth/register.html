@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container auth-wrapper">
+    <div class="row w-100 shadow-lg rounded-4 overflow-hidden" style="max-width: 900px; background: white;">
+        <div class="col-md-5 auth-sidebar d-none d-md-flex">
+            <h2 class="fw-bold mb-4">Join SkillXchange!</h2>
+            <p class="opacity-75 mb-4">Create your account to start learning from verifiable experts and teaching what you know best.</p>
+            <ul class="list-unstyled">
+                <li class="mb-3"><i class="fa-solid fa-check-circle me-2 text-warning"></i> Access to top-tier mentorship</li>
+                <li class="mb-3"><i class="fa-solid fa-check-circle me-2 text-warning"></i> Verify your skills</li>
+                <li class="mb-3"><i class="fa-solid fa-check-circle me-2 text-warning"></i> Earn reputation badges</li>
+            </ul>
+        </div>
+        <div class="col-md-7 p-5">
+            <h3 class="fw-bold mb-4">Create an Account</h3>
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label text-muted small fw-bold">Full Name</label>
+                        <input type="text" class="form-control" name="name" required placeholder="John Doe">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small fw-bold">Email</label>
+                        <input type="email" class="form-control" name="email" required placeholder="john@example.com">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted small fw-bold">Phone Number</label>
+                        <input type="text" class="form-control" name="phone" placeholder="+1 234 567 8900">
+                    </div>
+                    <div class="col-md-12 mb-4">
+                        <label class="form-label text-muted small fw-bold">Password</label>
+                        <input type="password" class="form-control" name="password" required placeholder="Create a strong password">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm mb-3">Register Account</button>
+                <div class="text-center text-muted small">
+                    Already have an account? <a href="{{ url_for('auth.login') }}" class="text-primary text-decoration-none fw-bold">Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

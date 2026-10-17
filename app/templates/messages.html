@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Messages</h2>
+        <p class="text-muted">Stay connected with your mentors and students.</p>
+    </div>
+
+    <div class="chat-container">
+        <!-- Chat Contacts -->
+        <div class="chat-sidebar bg-light">
+            <div class="p-3 border-bottom">
+                <input type="text" class="form-control form-control-sm rounded-pill" placeholder="Search conversations...">
+            </div>
+            <div class="chat-list" id="contactsList">
+                {% for contact in contacts %}
+                <div class="chat-item d-flex align-items-center" onclick="loadConversation('{{ contact.id }}', '{{ contact.name }}')">
+                    <div class="user-avatar extra-small me-3">{{ contact.name[0] }}</div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold mb-0 small">{{ contact.name }}</h6>
+                            <span class="extra-small text-muted">12:30 PM</span>
+                        </div>
+                        <p class="extra-small text-muted mb-0 text-truncate">Click to view messages</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-4 text-center text-muted small">No conversations yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Chat Main Area -->
+        <div class="chat-main">
+            <div id="noChatSelected" class="h-100 d-flex flex-column align-items-center justify-content-center text-muted">
+                <i class="fa-solid fa-comments fs-1 mb-3 opacity-25"></i>
+                <p>Select a conversation to start chatting</p>
+            </div>
+
+            <div id="chatActive" class="h-100 d-none flex-column">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar extra-small me-2" id="activeChatAvatar">?</div>
+                        <div class="lh-1">
+                            <h6 class="fw-bold mb-0" id="activeChatName">Loading...</h6>
+                            <span class="extra-small text-success fw-500"><i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> Online</span>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-light btn-sm rounded-circle"><i class="fa-solid fa-phone"></i></button>
+                        <button class="btn btn-light btn-sm rounded-circle ms-1"><i class="fa-solid fa-video"></i></button>
+                    </div>
+                </div>
+
+                <!-- Messages Window -->
+                <div class="flex-grow-1 p-4 overflow-y-auto d-flex flex-column" id="msgWindow">
+                    <!-- Messages loaded via JS -->
+                </div>
+
+                <!-- Input Field -->
+                <div class="p-3 border-top bg-white">
+                    <form id="msgForm" class="d-flex gap-2">
+                        <input type="text" id="msgInput" class="form-control rounded-pill border-0 bg-light px-4" placeholder="Type a message..." required>
+                        <button type="submit" class="btn btn-primary rounded-circle shadow-sm" style="width: 45px; height: 45px; flex-shrink: 0;">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let activeRecipientId = null;
+
+    function loadConversation(userId, name) {
+        activeRecipientId = userId;
+        document.getElementById('noChatSelected').classList.add('d-none');
+        document.getElementById('chatActive').classList.remove('d-none');
+        document.getElementById('activeChatName').innerText = name;
+        document.getElementById('activeChatAvatar').innerText = name[0];
+        
+        // Mark active in list
+        document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+        // (Add logic to find clicked item and add 'active')
+
+        // Fetch message history (conceptual, assuming API exists)
+        const msgWindow = document.getElementById('msgWindow');
+        msgWindow.innerHTML = '<div class="text-center py-5 text-muted small">Loading history...</div>';
+        
+        fetch(`/api/messages/history/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                msgWindow.innerHTML = '';
+                data.messages.forEach(msg => {
+                    appendMessage(msg.content, msg.sender_id == {{ current_user.id }});
+                });
+                msgWindow.scrollTop = msgWindow.scrollHeight;
+            });
+    }
+
+    function appendMessage(content, isSent) {
+        const msgWindow = document.getElementById('msgWindow');
+        const div = document.createElement('div');
+        div.className = `msg-bubble animate__animated animate__fadeInUp ${isSent ? 'msg-sent' : 'msg-received'}`;
+        div.innerText = content;
+        msgWindow.appendChild(div);
+        msgWindow.scrollTop = msgWindow.scrollHeight;
+    }
+
+    document.getElementById('msgForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('msgInput');
+        const content = input.value;
+        if (content && activeRecipientId) {
+            socket.emit('send_message', { recipient_id: activeRecipientId, content: content });
+            appendMessage(content, true);
+            input.value = '';
+        }
+    });
+
+    socket.on('receive_message', (data) => {
+        if (data.sender_id == activeRecipientId) {
+            appendMessage(data.content || data.message, false);
+        }
+    });
+</script>
+{% endblock %}

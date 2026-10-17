@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Session History{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <div class="mb-5">
+        <h2 class="fw-bold mb-1">Session History</h2>
+        <p class="text-muted">Review your past mentorship matches and learning progress.</p>
+    </div>
+
+    <div class="card border-0 p-4 shadow-sm">
+        {% if history %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="bg-light small text-muted text-uppercase fw-600">
+                        <tr>
+                            <th class="border-0 px-4">Date</th>
+                            <th class="border-0">Skill</th>
+                            <th class="border-0">Role</th>
+                            <th class="border-0">Partner</th>
+                            <th class="border-0 text-end px-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in history %}
+                        <tr>
+                            <td class="px-4 py-3 small">{{ s.session_date.strftime('%b %d, %Y') }}</td>
+                            <td class="py-3">
+                                <span class="fw-bold small">{{ s.skill.skill_name }}</span>
+                            </td>
+                            <td class="py-3 small">
+                                {% if s.mentor_id == current_user.id %}
+                                    <span class="badge bg-primary-light text-primary rounded-pill">Mentor</span>
+                                {% else %}
+                                    <span class="badge bg-success-light text-success rounded-pill">Learner</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar extra-small me-2" style="width: 24px; height: 24px;">
+                                        {{ s.learner.name[0] if s.mentor_id == current_user.id else s.mentor.name[0] }}
+                                    </div>
+                                    <span class="small">{{ s.learner.name if s.mentor_id == current_user.id else s.mentor.name }}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-end">
+                                <span class="badge bg-light text-muted border rounded-pill px-3">{{ s.status }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fa-solid fa-history fs-1 text-muted mb-3 opacity-25"></i>
+                <p class="text-muted mb-0">No past sessions found. Start learning to build your history!</p>
+                <a href="{{ url_for('skills.browse_skills') }}" class="btn btn-primary btn-sm rounded-pill px-4 mt-3">Find a Mentor</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

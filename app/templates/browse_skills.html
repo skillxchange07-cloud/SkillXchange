@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Skill Marketplace - Discover Expertise{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <!-- Header with Background Shape -->
+    <div class="mb-5 position-relative">
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-4">
+            <div>
+                <h1 class="fw-800 display-6 mb-1">Discover <span class="text-gradient">Expertise</span></h1>
+                <p class="text-muted lead mb-0">Join a verified network of mentors bartering professional knowledge.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <span class="badge bg-light text-muted border px-3 rounded-pill py-2">
+                    <i class="fa-solid fa-fire text-danger me-2"></i> {{ skills|length }} Trending Skills
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar: Premium Search & Filter -->
+    <div class="glass-panel mb-5 p-2 shadow-sm border-0">
+        <form action="{{ url_for('skills.browse_skills') }}" method="GET" class="row g-2 align-items-center">
+            <div class="col-md-7">
+                <div class="input-group px-3">
+                    <span class="input-group-text bg-transparent border-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                    <input type="text" name="q" class="form-control border-0 bg-transparent py-3" placeholder="Search skills, industries, or mentors..." value="{{ request.args.get('q', '') }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border-start px-3 d-flex align-items-center">
+                    <i class="fa-solid fa-layer-group text-muted me-2 small"></i>
+                    <select class="form-select border-0 bg-transparent py-3" name="category">
+                        <option value="">All Categories</option>
+                        {% for c in categories %}
+                            <option value="{{ c }}" {% if request.args.get('category') == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2 p-1">
+                <button type="submit" class="btn btn-premium w-100 rounded-pill py-3 h-100 shadow-none">
+                    Search Now
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Skills Grid -->
+    {% if skills %}
+    <div class="row g-4">
+        {% for skill in skills %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100 hover-lift border-0 shadow-sm p-4 d-flex flex-column" style="border-radius: 28px;">
+                <!-- Card Header -->
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div class="bg-primary-light p-3 rounded-4">
+                        <i class="fa-solid fa-cube fs-4"></i>
+                    </div>
+                    <form action="{{ url_for('mentorship.bookmark_skill', skill_id=skill.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-light rounded-circle p-2 shadow-none" style="width: 36px; height: 36px;">
+                            <i class="fa-heart {% if current_user.is_authenticated and skill in current_user.bookmarks | map(attribute='skill') %}fa-solid text-danger{% else %}fa-regular text-muted{% endif %} small"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Content -->
+                <div class="mb-4">
+                    <span class="badge bg-light text-muted fw-600 rounded-pill px-3 mb-2 small">{{ skill.category }}</span>
+                    <h5 class="fw-bold text-dark mb-2">{{ skill.skill_name }}</h5>
+                    <p class="text-muted extra-small mb-0 lh-lg text-truncate-2">{{ skill.description }}</p>
+                </div>
+                
+                <!-- Mentor Info & CTA -->
+                <div class="mt-auto">
+                    <div class="d-flex align-items-center justify-content-between mb-4 pt-3 border-top">
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar extra-small me-2 shadow-sm" style="width: 28px; height: 28px; border-width: 2px;">{{ skill.mentor.name[0] }}</div>
+                            <span class="extra-small fw-600 text-dark">{{ skill.mentor.name }}</span>
+                        </div>
+                        <div class="text-warning extra-small fw-700">
+                            <i class="fa-solid fa-star me-1"></i> 5.0
+                        </div>
+                    </div>
+                    <a href="{{ url_for('skills.skill_detail', skill_id=skill.id) }}" class="btn btn-light w-100 rounded-pill py-2 small fw-700">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="glass-panel d-inline-block p-5 text-center">
+            <i class="fa-solid fa-wind fs-1 text-muted mb-4 opacity-25"></i>
+            <h4 class="fw-bold">No skills matching your criteria</h4>
+            <p class="text-muted small">Try broadening your search or exploring all categories.</p>
+            <a href="{{ url_for('skills.browse_skills') }}" class="btn btn-premium rounded-pill px-5 mt-3">Reset Filters</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

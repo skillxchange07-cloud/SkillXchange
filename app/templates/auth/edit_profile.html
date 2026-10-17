@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate__animated animate__fadeIn">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white p-4">
+                <h4 class="mb-0 fw-bold"><i class="fa-solid fa-user-pen me-2"></i> Edit Profile</h4>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('auth.edit_profile') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-4">
+                        <label for="name" class="form-label fw-bold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="name" name="name" value="{{ current_user.name }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="phone" class="form-label fw-bold">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="phone" name="phone" value="{{ current_user.phone }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="preferred_mode" class="form-label fw-bold">Preferred Session Mode</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-video text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="preferred_mode" name="preferred_mode" value="{{ current_user.preferred_mode or '' }}" placeholder="e.g. Google Meet, Zoom, In-person">
+                        </div>
+                        <div class="form-text">How do you prefer to conduct your mentorship sessions?</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="availability" class="form-label fw-bold">Availability</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-check text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="availability" name="availability" value="{{ current_user.availability or '' }}" placeholder="e.g. Weekends 10 AM - 2 PM">
+                        </div>
+                        <div class="form-text">When are you generally available for sessions?</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">
+                            Save Changes
+                        </button>
+                        <a href="{{ url_for('auth.mentor_profile', user_id=current_user.id) }}" class="btn btn-light rounded-pill">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

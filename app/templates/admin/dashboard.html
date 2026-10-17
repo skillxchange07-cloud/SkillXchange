@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}SkillXchange Administration Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom pb-3">
+        <h2 class="fw-bold text-danger"><i class="fa-solid fa-shield-halved me-2"></i> Admin Control Panel</h2>
+        <span class="badge bg-danger rounded-pill px-3 py-2"><i class="fa-solid fa-lock me-1"></i> Authorized Personnel Only</span>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm glass-card p-4 text-center border-bottom border-danger border-4 h-100">
+                <i class="fa-solid fa-users fs-1 text-muted mb-3 opacity-50"></i>
+                <h2 class="fw-bold mb-0">{{ users_count }}</h2>
+                <p class="text-muted small text-uppercase fw-bold mb-0">Total Registered Users</p>
+                <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-danger mt-3 rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="fa-solid fa-users-gear me-2"></i> Manage Users
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm glass-card p-4 text-center border-bottom border-primary border-4 h-100">
+                <i class="fa-solid fa-book-open fs-1 text-muted mb-3 opacity-50"></i>
+                <h2 class="fw-bold mb-0">{{ skills_count }}</h2>
+                <p class="text-muted small text-uppercase fw-bold mb-0">Total Platform Skills</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm glass-card p-4 text-center border-bottom border-warning border-4 h-100">
+                <i class="fa-solid fa-clock-rotate-left fs-1 text-muted mb-3 opacity-50"></i>
+                <h2 class="fw-bold text-warning mb-0">{{ pending_skills|length }}</h2>
+                <p class="text-muted small text-uppercase fw-bold mb-0">Pending Verification Tasks</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card glass-card border-0 p-4 shadow-sm">
+                <h4 class="fw-bold mb-4"><i class="fa-solid fa-chart-line text-primary me-2"></i> Platform Analytics Overview</h4>
+                <div style="height: 300px;">
+                    <canvas id="adminStatsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Queue -->
+    <h4 class="fw-bold mb-4"><i class="fa-solid fa-list-check text-primary me-2"></i> Content Moderation Queue</h4>
+    
+    <div class="card glass-card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-center">
+                <thead class="bg-light text-muted small text-uppercase fw-bold border-bottom">
+                    <tr>
+                        <th class="py-3 ps-4 text-start">Skill / Course Title</th>
+                        <th class="py-3">Mentor</th>
+                        <th class="py-3">Category</th>
+                        <th class="py-3">Demo Media</th>
+                        <th class="py-3 pe-4">Required Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pending_skills %}
+                    <tr class="border-bottom">
+                        <td class="py-3 ps-4 fw-bold text-start">{{ p.skill_name }}</td>
+                        <td class="py-3"><a href="{{ url_for('auth.mentor_profile', user_id=p.mentor_id) }}" class="text-decoration-none">{{ p.mentor.name }}</a></td>
+                        <td class="py-3"><span class="badge bg-light text-dark border">{{ p.category }}</span></td>
+                        <td class="py-3">
+                            {% if p.demo_video_path %}
+                                <a href="{{ url_for('static', filename='uploads/' + p.demo_video_path) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill px-3 shadow-sm mx-auto">
+                                    <i class="fa-solid fa-play-circle me-1"></i> Preview Video
+                                </a>
+                            {% else %}
+                                <span class="text-muted small"><i class="fa-solid fa-video-slash me-1"></i> No Video</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 pe-4 text-nowrap">
+                            <form action="{{ url_for('admin.verify_skill', skill_id=p.id) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="action" value="Approve">
+                                <button type="submit" class="btn btn-sm btn-success rounded-pill fw-bold shadow-sm px-3 mx-1">
+                                    <i class="fa-solid fa-check"></i> Approve
+                                </button>
+                            </form>
+                            <form action="{{ url_for('admin.verify_skill', skill_id=p.id) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="action" value="Reject">
+                                <button type="submit" class="btn btn-sm btn-danger rounded-pill fw-bold shadow-sm px-3 mx-1">
+                                    <i class="fa-solid fa-xmark"></i> Reject
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="py-5 text-muted"><i class="fa-solid fa-check-circle text-success fs-1 mb-3 d-block"></i> Queue is empty. All skills have been verified!</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('{{ url_for("admin.get_stats") }}')
+            .then(res => res.json())
+            .then(data => {
+                const ctx = document.getElementById('adminStatsChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Users', 'Skills', 'Matches', 'Sessions', 'Active (30d)'],
+                        datasets: [{
+                            label: 'Platform Activity',
+                            data: [data.users, data.skills, data.matches, data.sessions, data.active],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+{% endblock %}

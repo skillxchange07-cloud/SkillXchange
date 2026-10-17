@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}{{ user.name }} - Expert Profile{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <!-- Hero Section with Mesh Gradient -->
+    <div class="position-relative mb-5" style="height: 320px;">
+        <div class="w-100 h-100 mesh-gradient rounded-5 overflow-hidden shadow-lg">
+            <!-- Background mesh -->
+            <div class="opacity-25 w-100 h-100" style="background: radial-gradient(circle at 20% 30%, #ffffff 0%, transparent 40%), radial-gradient(circle at 80% 70%, #ffffff 0%, transparent 40%);"></div>
+        </div>
+        
+        <!-- Profile Floating Card -->
+        <div class="position-absolute top-100 start-50 translate-middle w-100 px-4" style="margin-top: -60px;">
+            <div class="container">
+                <div class="glass-panel p-4 p-md-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-auto text-center mb-4 mb-md-0">
+                            <div class="user-avatar shadow-lg border border-5 border-white mx-auto" style="width: 160px; height: 160px; font-size: 4rem; background: var(--white); transform: translateY(-30%);">
+                                {{ user.name[0] | upper }}
+                            </div>
+                        </div>
+                        <div class="col-md ms-md-4">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-4">
+                                <div>
+                                    <h1 class="fw-800 display-5 mb-1 text-gradient">{{ user.name }}</h1>
+                                    <p class="text-muted lead mb-3">
+                                        <i class="fa-solid fa-circle-check text-primary me-2"></i>
+                                        {% if user.role == 'Admin' %}System Administrator{% else %}Verified Skill Mentor{% endif %}
+                                        <span class="opacity-25 mx-3">|</span>
+                                        <i class="fa-solid fa-earth-americas me-2"></i> Global Community Member
+                                    </p>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        {% if user.badges %}
+                                            {% for badge in user.badges %}
+                                                <span class="badge bg-warning-light p-2 rounded-pill px-3 border border-warning">
+                                                    <i class="fa-solid fa-medal me-1"></i> {{ badge.badge_name }}
+                                                </span>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    {% if current_user.is_authenticated and current_user.id != user.id %}
+                                        <a href="mailto:{{ user.email }}" class="btn btn-premium btn-lg rounded-pill px-5 text-decoration-none">
+                                            <i class="fa-solid fa-bolt me-2"></i> Connect & Chat
+                                        </a>
+                                    {% endif %}
+                                    {% if current_user.is_authenticated and current_user.id == user.id %}
+                                        <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-light btn-lg rounded-pill px-5 shadow-sm text-decoration-none">
+                                            <i class="fa-solid fa-user-pen me-2"></i> Edit Profile
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="container" style="margin-top: 240px;">
+        <div class="row g-5">
+            <!-- Left Column: Details -->
+            <div class="col-lg-8">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills mb-5 gap-2" id="profileTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active rounded-pill px-4" id="about-tab" data-bs-toggle="tab" data-bs-target="#about">Overview</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link rounded-pill px-4" id="skills-tab" data-bs-toggle="tab" data-bs-target="#skills-grid">Mentorships</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link rounded-pill px-4" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews">Student Reviews</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="profileTabsContent">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="about">
+                        <div class="card border-0 mb-5 p-5">
+                            <h4 class="fw-bold mb-4">About the Mentor</h4>
+                            <p class="text-muted lead lh-lg mb-0">
+                                Dedicated professional with a proven track record in cross-skill education. 
+                                Specializing in adaptive learning techniques designed for the modern digital economy. 
+                                Join my network to trade expertise and grow exponentially.
+                            </p>
+                        </div>
+                        
+                        <div class="card border-0 p-5 bg-primary-light">
+                            <h5 class="fw-bold mb-4"><i class="fa-solid fa-graduation-cap me-2"></i> Why learn with me?</h5>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex gap-3">
+                                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                                        <p class="small text-muted mb-0">Personalized curriculum tailored to your goals</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex gap-3">
+                                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                                        <p class="small text-muted mb-0">Hands-on project work and real-world scenarios</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex gap-3">
+                                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                                        <p class="small text-muted mb-0">Weekly sessions with flexible time slots</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex gap-3">
+                                        <i class="fa-solid fa-check text-primary mt-1"></i>
+                                        <p class="small text-muted mb-0">Integrated chat support for quick questions</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mentorships Tab -->
+                    <div class="tab-pane fade" id="skills-grid">
+                        <div class="row g-4">
+                            {% set approved_skills = user.skills | selectattr("verification_status", "equalto", "Approved") | list %}
+                            {% if approved_skills %}
+                                {% for skill in approved_skills %}
+                                <div class="col-md-6">
+                                    <div class="card h-100 hover-lift border-0 shadow-sm p-4">
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <span class="badge bg-primary-light rounded-pill px-3">{{ skill.category }}</span>
+                                            <div class="text-warning small"><i class="fa-solid fa-star"></i> 5.0</div>
+                                        </div>
+                                        <h5 class="fw-bold mb-2">{{ skill.skill_name }}</h5>
+                                        <p class="text-muted extra-small mb-4 lh-lg">{{ skill.description }}</p>
+                                        <a href="{{ url_for('skills.skill_detail', skill_id=skill.id) }}" class="btn btn-primary w-100 rounded-pill">View Details</a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-12 py-5 text-center">
+                                    <div class="opacity-25 mb-3"><i class="fa-solid fa-book fs-1"></i></div>
+                                    <h6 class="text-muted">No public skills listed at the moment.</h6>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Reviews Tab -->
+                    <div class="tab-pane fade" id="reviews">
+                        {% if user.ratings_received %}
+                            <div class="row g-4">
+                                {% for r in user.ratings_received %}
+                                <div class="col-md-12">
+                                    <div class="card border-0 p-4 shadow-sm hover-lift">
+                                        <div class="d-flex justify-content-between mb-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="user-avatar extra-small me-3 shadow-sm">{{ r.rater.name[0] }}</div>
+                                                <div>
+                                                    <h6 class="fw-bold mb-0">{{ r.rater.name }}</h6>
+                                                    <div class="extra-small text-muted">{{ r.created_at.strftime('%b %d, %Y') }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="text-warning small">
+                                                {% for i in range(r.rating_value) %}<i class="fa-solid fa-star"></i>{% endfor %}
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small italic mb-0">"{{ r.review }}"</p>
+                                        <div class="mt-3 text-primary extra-small fw-600 border-top pt-2 d-inline-block">Lesson: {{ r.skill.skill_name }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fa-solid fa-comment-slash fs-1 text-muted mb-3 opacity-25"></i>
+                                <p class="text-muted">Be the first to leave a testimonial for {{ user.name }}.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Sidebar Stats -->
+            <div class="col-lg-4">
+                <div class="position-sticky" style="top: 100px;">
+                    <!-- Platform Stats -->
+                    <div class="card border-0 mb-4 p-4 shadow-sm">
+                        <h6 class="fw-bold mb-4 text-muted text-uppercase small">Performance Insights</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="bg-light p-3 rounded-4 text-center">
+                                    <div class="stat-value text-primary">{{ user.skills | length }}</div>
+                                    <div class="extra-small text-muted">Courses</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light p-3 rounded-4 text-center">
+                                    <div class="stat-value text-success">12+</div>
+                                    <div class="extra-small text-muted">Students</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="bg-light p-3 rounded-4 text-center">
+                                    <div class="stat-value text-warning">
+                                        {% set total_ratings = user.ratings_received | length %}
+                                        {% if total_ratings > 0 %}
+                                            {% set sum_ratings = user.ratings_received | map(attribute='rating_value') | sum %}
+                                            {{ (sum_ratings / total_ratings) | round(1) }}
+                                        {% else %}4.9{% endif %}
+                                    </div>
+                                    <div class="extra-small text-muted">Satisfaction Score</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Sidebar Actions -->
+                    <div class="card border-0 p-4 shadow-sm bg-dark text-white">
+                        <h6 class="fw-bold mb-3">Availability</h6>
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="status-indicator status-online me-2"></div>
+                            <span class="extra-small opacity-75">Available for New Students</span>
+                        </div>
+                        <ul class="list-unstyled mb-4">
+                            <li class="d-flex justify-content-between mb-3 small opacity-75">
+                                <span>Timezone</span>
+                                <span class="fw-600">GMT +5:30</span>
+                            </li>
+                            <li class="d-flex justify-content-between mb-3 small opacity-75">
+                                <span>Member Since</span>
+                                <span class="fw-600">Oct 2025</span>
+                            </li>
+                        </ul>
+                        <a href="mailto:{{ user.email }}" class="btn btn-premium w-100 rounded-pill py-2 text-decoration-none text-center">Get in Touch</a>
+                    </div>
+
+                    <!-- Share Profile -->
+                    <div class="mt-4 text-center">
+                        <p class="extra-small text-muted mb-2">Share this profile</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-light rounded-circle shadow-sm" style="width: 38px; height: 38px; padding: 0;"><i class="fa-brands fa-linkedin-in small"></i></button>
+                            <button class="btn btn-light rounded-circle shadow-sm" style="width: 38px; height: 38px; padding: 0;"><i class="fa-brands fa-twitter small"></i></button>
+                            <button class="btn btn-light rounded-circle shadow-sm" style="width: 38px; height: 38px; padding: 0;"><i class="fa-solid fa-link small"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

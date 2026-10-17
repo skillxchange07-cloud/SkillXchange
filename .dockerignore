@@ -1,0 +1,54 @@
+# ==============================================================================
+# SkillXchange — .dockerignore
+# ==============================================================================
+
+# Virtual Environment & Python Packages
+.venv/
+venv/
+env/
+ENV/
+
+# Python Bytecode, Caches & Logs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Git Metadata
+.git/
+.gitignore
+
+# Environment Variables & Local Secrets
+.env
+.env.*
+*.pem
+*.key
+*.cert
+!.env.example
+
+# Local SQLite Databases & Database Sidecars
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+instance/
+
+# Local User Uploads (Excludes binary videos, preserves directory & static assets)
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Local Scratch, Backups & Isolated Cloudflare PoC
+scratch/
+backup_original/
+backup_phase1/
+backup_phase2/
+cloudflare_poc/
+
+# Unrelated Documentation Subfolder
+SkillXchange/
