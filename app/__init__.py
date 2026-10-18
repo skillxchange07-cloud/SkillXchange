@@ -9,7 +9,7 @@ from flask_limiter.util import get_remote_address
 from flask_apscheduler import APScheduler
 from flask_wtf.csrf import CSRFProtect
 import os
-from config import Config
+from config import Config, is_production, parse_allowed_origins
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -40,13 +40,15 @@ def create_app(config_class=Config):
     limiter.init_app(app)
 
     # Secure WebSocket CORS
-    allowed_origins = os.environ.get('ALLOWED_ORIGINS')
-    if allowed_origins:
-        cors_origins = [o.strip() for o in allowed_origins.split(',') if o.strip()]
-    elif os.environ.get('FLASK_ENV') == 'production' or os.environ.get('ENV') == 'production':
-        cors_origins = []  # Explicit origins required in production
-    else:
-        cors_origins = "*"  # Permissive for local dev
+    cors_origins = app.config.get('CORS_ALLOWED_ORIGINS')
+    if cors_origins is None:
+        cors_origins = parse_allowed_origins(
+            os.environ.get('ALLOWED_ORIGINS'),
+            is_prod=is_production()
+        )
+    elif is_production():
+        if cors_origins == '*' or (isinstance(cors_origins, (list, tuple)) and '*' in cors_origins):
+            raise RuntimeError("CRITICAL SECURITY ERROR: Wildcard '*' is not permitted for CORS / Socket.IO in production!")
 
     socketio.init_app(app, cors_allowed_origins=cors_origins)
 
