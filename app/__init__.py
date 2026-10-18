@@ -32,7 +32,10 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
-    scheduler.init_app(app)
+    if not scheduler.running:
+        scheduler.init_app(app)
+    else:
+        app.apscheduler = scheduler
     csrf.init_app(app)
     limiter.init_app(app)
 
@@ -47,7 +50,7 @@ def create_app(config_class=Config):
 
     socketio.init_app(app, cors_allowed_origins=cors_origins)
 
-    if not scheduler.running:
+    if not app.config.get('TESTING', False) and not scheduler.running:
         scheduler.start()
 
 

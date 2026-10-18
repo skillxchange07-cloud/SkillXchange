@@ -362,13 +362,15 @@ def session_history():
 
 @mentorship.route('/leaderboard')
 def leaderboard():
-    # Gather mentors and average ratings
+    # Gather mentors and average ratings for active users
     mentors = db.session.query(
         User.id, 
         User.name, 
         db.func.avg(Rating.rating_value).label('avg_rating'),
         db.func.count(Rating.id).label('rating_count')
     ).join(Rating, Rating.mentor_id == User.id)\
-     .group_by(User.id).order_by(db.desc('avg_rating')).all()
+     .filter(User.is_active.is_(True))\
+     .group_by(User.id, User.name)\
+     .order_by(db.desc('avg_rating')).all()
     
     return render_template('leaderboard.html', mentors=mentors)
