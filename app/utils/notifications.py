@@ -99,3 +99,62 @@ def schedule_reminder(session_id, session_date):
         replace_existing=True
     )
     print(f"Reminder scheduled for session {session_id} at {reminder_time}")
+
+
+def recover_scheduled_reminders(app=None):
+    """
+    Recovers eligible pending session reminders from the database after an application restart or wake-up.
+    Only schedules reminders for sessions that:
+      1. Have status == 'Scheduled'
+      2. Have session_date in the future (session_date > now)
+      3. Have not already had reminders dispatched (verified via Notification records)
+      4. Are not already active in the scheduler
+    """
+    active_app = app or getattr(scheduler, 'app', None)
+    if not active_app:
+        try:
+            from flask import current_app
+            active_app = current_app._get_current_object()
+        except Exception:
+            return 0
+
+    with active_app.app_context():
+        now = datetime.utcnow()
+        try:
+            upcoming_sessions = Session.query.filter(
+                Session.status == 'Scheduled',
+                Session.session_date > now
+            ).all()
+        except Exception as e:
+            # Table might not exist yet (e.g. prior to initial schema execution) or DB unavailable
+            print(f"Skipping reminder recovery (database not ready or table missing): {e}")
+            return 0
+
+        recovered_count = 0
+        for sess in upcoming_sessions:
+            # 1. Email reminder recovery
+            email_job_id = f'session_reminder_{sess.id}'
+            if scheduler.get_job(email_job_id) is None:
+                already_sent_email = Notification.query.filter_by(
+                    user_id=sess.learner_id,
+                    type='Session_Reminder',
+                    message=f"Reminder dispatched for Session #{sess.id}"
+                ).first()
+                if not already_sent_email:
+                    schedule_reminder(sess.id, sess.session_date)
+                    recovered_count += 1
+
+            # 2. SMS reminder recovery
+            sms_job_id = f'sms_reminder_{sess.id}'
+            if scheduler.get_job(sms_job_id) is None:
+                already_sent_sms = Notification.query.filter_by(
+                    user_id=sess.learner_id,
+                    type='SMS_Reminder',
+                    message=f"SMS reminder dispatched for Session #{sess.id}"
+                ).first()
+                if not already_sent_sms:
+                    from app.utils.sms_service import schedule_sms_reminder
+                    schedule_sms_reminder(sess.id, sess.session_date)
+
+        print(f"Startup reminder recovery complete: {recovered_count} session reminders scheduled.")
+        return recovered_count

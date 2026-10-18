@@ -240,7 +240,8 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'your-app-password'
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'your-email@gmail.com'
 
-    # Flask-APScheduler configuration
-    SCHEDULER_API_ENABLED = True
+    # Flask-APScheduler configuration: Disable public management REST endpoints & enforce UTC
+    SCHEDULER_API_ENABLED = False
+    SCHEDULER_TIMEZONE = "UTC"
 
 

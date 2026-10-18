@@ -531,6 +531,41 @@ class ProductionGuardTestSuite(unittest.TestCase):
             self.assertTrue(config.Config.SQLALCHEMY_DATABASE_URI.startswith('postgresql://'))
             self.assertIn('supabase_user:securepass@db.host.supabase.co:5432/postgres', config.Config.SQLALCHEMY_DATABASE_URI)
 
+    # -------------------------------------------------------------------------
+    # 12. Scheduler API disabled and endpoints inaccessible
+    # -------------------------------------------------------------------------
+    def test_12_scheduler_api_disabled_and_endpoints_inaccessible(self):
+        self.assertFalse(config.Config.SCHEDULER_API_ENABLED)
+        from app import create_app, scheduler
+        app = create_app(config.Config)
+
+        # Verify no scheduler management routes are registered in app.url_map
+        scheduler_rules = [r.rule for r in app.url_map.iter_rules() if r.rule.startswith('/scheduler')]
+        self.assertEqual(scheduler_rules, [])
+
+        # Verify client receives 404 on scheduler management endpoints
+        client = app.test_client()
+        for endpoint in ['/scheduler/jobs', '/scheduler/pause', '/scheduler/shutdown', '/scheduler']:
+            res_get = client.get(endpoint)
+            self.assertEqual(res_get.status_code, 404)
+            res_post = client.post(endpoint)
+            self.assertEqual(res_post.status_code, 404)
+
+        # Verify internal scheduling functionality remains intact
+        def dummy_task():
+            pass
+
+        scheduler.add_job(
+            id='internal_test_reminder',
+            func=dummy_task,
+            trigger='date',
+            run_date='2099-01-01 00:00:00',
+            replace_existing=True
+        )
+        self.assertIsNotNone(scheduler.get_job('internal_test_reminder'))
+        scheduler.remove_job('internal_test_reminder')
+        self.assertIsNone(scheduler.get_job('internal_test_reminder'))
+
 
 if __name__ == '__main__':
     unittest.main()

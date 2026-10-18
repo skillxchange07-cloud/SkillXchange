@@ -52,8 +52,14 @@ def create_app(config_class=Config):
 
     socketio.init_app(app, cors_allowed_origins=cors_origins)
 
-    if not app.config.get('TESTING', False) and not scheduler.running:
-        scheduler.start()
+    if not app.config.get('TESTING', False):
+        if not scheduler.running:
+            scheduler.start()
+        try:
+            from app.utils.notifications import recover_scheduled_reminders
+            recover_scheduled_reminders(app)
+        except Exception as e:
+            app.logger.warning(f"Could not recover scheduled reminders on startup: {e}")
 
 
     # Register Blueprints
