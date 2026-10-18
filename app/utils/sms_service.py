@@ -4,6 +4,7 @@ from flask import current_app
 from app import scheduler, db
 from app.models import Session, User, Skill, Notification
 from datetime import datetime, timedelta
+from apscheduler.jobstores.base import JobLookupError
 
 def send_sms(number, message):
     """
@@ -105,8 +106,21 @@ def schedule_sms_reminder(session_id, session_date):
     if reminder_time < datetime.utcnow():
         reminder_time = datetime.utcnow() + timedelta(seconds=10)
 
+    job_id = f'sms_reminder_{session_id}'
+    try:
+        if scheduler.get_job(job_id):
+            scheduler.remove_job(job_id)
+    except JobLookupError:
+        pass
+    except Exception as e:
+        try:
+            from flask import current_app
+            current_app.logger.error(f"Unexpected error removing existing scheduler job {job_id}: {e}")
+        except Exception:
+            print(f"Unexpected error removing existing scheduler job {job_id}: {e}")
+
     scheduler.add_job(
-        id=f'sms_reminder_{session_id}',
+        id=job_id,
         func=send_sms_reminder_job,
         args=[session_id],
         trigger='date',

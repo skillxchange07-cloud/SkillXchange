@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from app import db
 from app.models import Skill, ContactRequest, Session, User, Rating, Badge
 from datetime import datetime, timedelta
-from app.utils.notifications import send_session_confirmation_email, schedule_reminder, send_email
+from app.utils.notifications import send_session_confirmation_email, schedule_reminder, send_email, reschedule_session_reminders
 from app.utils.sms_service import send_session_confirmation_sms, schedule_sms_reminder
 import secrets
 import random
@@ -200,9 +200,13 @@ def reschedule_session(session_id):
         flash('Conflict detected! One of the users already has a session at this time.', 'danger')
         return redirect(url_for('mentorship.my_requests'))
 
-    sess.session_date = new_dt
     sess.status = 'Scheduled'
-    db.session.commit()
+    try:
+        reschedule_session_reminders(sess, new_dt)
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred while rescheduling the session.', 'danger')
+        return redirect(url_for('mentorship.my_requests'))
     
     flash('Session rescheduled successfully!', 'success')
     return redirect(url_for('mentorship.my_requests'))
