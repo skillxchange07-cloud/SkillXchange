@@ -528,7 +528,7 @@ class ProductionGuardTestSuite(unittest.TestCase):
             'ALLOWED_ORIGINS': 'https://skillxchange.onrender.com'
         }, clear=False):
             importlib.reload(config)
-            self.assertTrue(config.Config.SQLALCHEMY_DATABASE_URI.startswith('postgresql://'))
+            self.assertTrue(config.Config.SQLALCHEMY_DATABASE_URI.startswith('postgresql+psycopg2://'))
             self.assertIn('supabase_user:securepass@db.host.supabase.co:5432/postgres', config.Config.SQLALCHEMY_DATABASE_URI)
 
     # -------------------------------------------------------------------------
