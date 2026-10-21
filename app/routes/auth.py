@@ -6,6 +6,30 @@ from flask_login import login_user, current_user, logout_user, login_required
 
 auth = Blueprint('auth', __name__)
 
+def classify_db_exception(exc):
+    """Safely categorizes database operational errors without leaking connection strings, credentials, or queries."""
+    orig = getattr(exc, 'orig', exc)
+    pgcode = getattr(orig, 'pgcode', None)
+    if pgcode == '28P01':
+        return "AUTH_PASSWORD_FAILURE (SQLSTATE 28P01)"
+    elif pgcode == '28000':
+        return "AUTH_SPECIFICATION_FAILURE (SQLSTATE 28000)"
+    elif pgcode and str(pgcode).startswith('28'):
+        return f"AUTH_OTHER_FAILURE (SQLSTATE {pgcode})"
+
+    msg = str(orig).lower() if orig else ""
+    if "could not translate host name" in msg or "name or service not known" in msg:
+        return "DNS_RESOLUTION_FAILURE"
+    elif "password authentication failed" in msg:
+        return "AUTH_PASSWORD_FAILURE (SQLSTATE 28P01)"
+    elif "connection timed out" in msg or "could not connect to server" in msg or "connection refused" in msg:
+        return "CONNECTION_TIMEOUT_OR_REFUSED"
+    elif "ssl" in msg or "handshake" in msg or "certificate" in msg:
+        return "SSL_TLS_FAILURE"
+    elif "tenant" in msg:
+        return "TENANT_NOT_FOUND"
+    return f"OTHER_OPERATIONAL_ERROR ({type(orig).__name__})"
+
 @auth.route('/register', methods=['GET', 'POST'])
 @limiter.limit("15 per hour", methods=['POST'])
 def register():
@@ -47,7 +71,11 @@ def login():
         try:
             user = User.query.filter_by(email=email).first()
         except Exception as exc:
-            print(f"[AUTH_DIAGNOSTIC] Exception: {type(exc).__name__}", file=sys.stderr, flush=True)
+            try:
+                category = classify_db_exception(exc)
+                print(f"[AUTH_DIAGNOSTIC] Category: {category}", file=sys.stderr, flush=True)
+            except Exception:
+                print(f"[AUTH_DIAGNOSTIC] Category: CLASSIFIER_ERROR ({type(exc).__name__})", file=sys.stderr, flush=True)
             raise
         if user and bcrypt.check_password_hash(user.password_hash, password):
             if not user.is_active:
