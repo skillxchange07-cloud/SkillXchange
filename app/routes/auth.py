@@ -1,3 +1,4 @@
+import sys
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from app import db, bcrypt, limiter
 from app.models import User, ContactRequest, Notification, Message
@@ -43,7 +44,11 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         
-        user = User.query.filter_by(email=email).first()
+        try:
+            user = User.query.filter_by(email=email).first()
+        except Exception as exc:
+            print(f"[AUTH_DIAGNOSTIC] Exception: {type(exc).__name__}", file=sys.stderr, flush=True)
+            raise
         if user and bcrypt.check_password_hash(user.password_hash, password):
             if not user.is_active:
                 flash('Your account has been deactivated. Please contact an administrator.', 'warning')
