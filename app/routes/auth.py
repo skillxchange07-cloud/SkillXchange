@@ -57,6 +57,30 @@ def login():
     return render_template('auth/login.html')
 
 
+DEMO_ACCOUNTS = {
+    'mentor': 'rahul@example.com',
+    'learner': 'priya@example.com',
+    'admin': 'admin@skillxchange.com',
+}
+
+
+@auth.route('/demo_login', methods=['POST'])
+@auth.route('/demo_login/<role>', methods=['POST'])
+def demo_login(role='mentor'):
+    target_role = (request.form.get('role') or role or 'mentor').strip().lower()
+    email = DEMO_ACCOUNTS.get(target_role, DEMO_ACCOUNTS['mentor'])
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash('Demo account is not available yet.', 'warning')
+        return redirect(url_for('auth.login'))
+
+    login_user(user, remember=True)
+    flash(f'Signed in to demo account as {user.name} ({user.role}).', 'success')
+    if user.role == 'Admin':
+        return redirect(url_for('admin.dashboard'))
+    return redirect(url_for('auth.dashboard'))
+
+
 @auth.route('/logout')
 def logout():
     logout_user()

@@ -18,6 +18,11 @@
                     <p class="lead text-muted mb-5 fs-4">Join an elite peer-to-peer network where skills are the currency. No subscriptions, just pure expertise exchange.</p>
                     <div class="d-flex gap-3 justify-content-center justify-content-lg-start flex-wrap">
                         <a href="{{ url_for('auth.register') }}" class="btn btn-premium btn-lg rounded-pill px-5 py-3 shadow-lg">Start Exchanging</a>
+                        <form action="{{ url_for('auth.demo_login', role='mentor') }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-outline-primary btn-lg rounded-pill px-4 py-3 fw-bold bg-white shadow-sm">
+                                <i class="fa-solid fa-bolt me-2"></i>Try Demo Login
+                            </button>
+                        </form>
                         <a href="{{ url_for('skills.browse_skills') }}" class="btn btn-light btn-lg rounded-pill px-5 py-3 border shadow-sm">Explore Marketplace</a>
                     </div>
                     <div class="mt-5 d-flex align-items-center justify-content-center justify-content-lg-start gap-4">

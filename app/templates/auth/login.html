@@ -41,25 +41,27 @@
                         </div>
                     </form>
 
-                    <!-- Demo Account Quick-Fill -->
+                    <!-- 1-Click Demo Login -->
                     <div class="bg-light rounded-4 p-3 border">
-                        <p class="extra-small text-muted fw-bold text-uppercase mb-2">Demo Accounts (Password: <code>password123</code>)</p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="fillDemo('rahul@example.com')">Mentor (Rahul)</button>
-                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="fillDemo('priya@example.com')">Learner (Priya)</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="fillDemo('admin@skillxchange.com')">Admin</button>
+                        <p class="extra-small text-muted fw-bold text-uppercase mb-2">
+                            <i class="fa-solid fa-bolt text-primary me-1"></i> Instant 1-Click Demo Login
+                        </p>
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <form action="{{ url_for('auth.demo_login', role='mentor') }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">Demo Mentor (Rahul)</button>
+                            </form>
+                            <form action="{{ url_for('auth.demo_login', role='learner') }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3">Demo Learner (Priya)</button>
+                            </form>
+                            <form action="{{ url_for('auth.demo_login', role='admin') }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3">Demo Admin</button>
+                            </form>
                         </div>
+                        <p class="extra-small text-muted mb-0">Manual credentials: <code>rahul@example.com</code> / <code>password123</code></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    function fillDemo(email) {
-        document.getElementById('loginEmail').value = email;
-        document.getElementById('loginPassword').value = 'password123';
-    }
-</script>
 {% endblock %}

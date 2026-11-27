@@ -98,7 +98,12 @@ def run_smoke_tests():
     assert resp.status_code == 200
     assert b'Session rescheduled successfully' in resp.data
 
-    # 8. Admin login & dashboard
+    # 8. Demo login route & Admin login
+    client.get('/logout', follow_redirects=True)
+    resp = client.post('/demo_login/learner', follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'Priya Patel' in resp.data
+
     client.get('/logout', follow_redirects=True)
     resp = client.post('/login', data={'email': 'admin@skillxchange.com', 'password': 'password123'}, follow_redirects=True)
     assert resp.status_code == 200
