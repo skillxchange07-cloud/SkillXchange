@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center animate__animated animate__fadeIn">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-primary text-white p-4">
+                <h4 class="mb-0 fw-bold"><i class="fa-solid fa-user-pen me-2"></i> Edit Profile</h4>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="{{ url_for('auth.edit_profile') }}">
+                    <div class="mb-4">
+                        <label for="name" class="form-label fw-bold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="name" name="name" value="{{ current_user.name }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="phone" class="form-label fw-bold">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-phone text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="phone" name="phone" value="{{ current_user.phone or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="preferred_mode" class="form-label fw-bold">Preferred Session Mode</label>
+                        <select class="form-select" id="preferred_mode" name="preferred_mode">
+                            <option value="Jitsi (In-App)" {% if current_user.preferred_mode == 'Jitsi (In-App)' %}selected{% endif %}>Jitsi (In-App)</option>
+                            <option value="Google Meet" {% if current_user.preferred_mode == 'Google Meet' %}selected{% endif %}>Google Meet</option>
+                            <option value="Zoom" {% if current_user.preferred_mode == 'Zoom' %}selected{% endif %}>Zoom</option>
+                        </select>
+                        <div class="form-text">How do you prefer to conduct your mentorship sessions?</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="availability" class="form-label fw-bold">Availability</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-check text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="availability" name="availability" value="{{ current_user.availability or '' }}" placeholder="e.g. Weekends 10 AM - 2 PM">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="zoom_link" class="form-label fw-bold">Personal Zoom Link (optional)</label>
+                            <input type="url" class="form-control" id="zoom_link" name="zoom_link" value="{{ current_user.zoom_link or '' }}" placeholder="https://zoom.us/j/...">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="meet_link" class="form-label fw-bold">Personal Google Meet Link (optional)</label>
+                            <input type="url" class="form-control" id="meet_link" name="meet_link" value="{{ current_user.meet_link or '' }}" placeholder="https://meet.google.com/...">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold">
+                            Save Changes
+                        </button>
+                        <a href="{{ url_for('auth.mentor_profile', user_id=current_user.id) }}" class="btn btn-light rounded-pill">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

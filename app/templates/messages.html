@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Messages</h2>
+        <p class="text-muted">Stay connected with your mentors and students.</p>
+    </div>
+
+    <div class="chat-container">
+        <!-- Chat Contacts -->
+        <div class="chat-sidebar bg-light">
+            <div class="p-3 border-bottom">
+                <input type="text" id="contactSearchInput" class="form-control form-control-sm rounded-pill" placeholder="Search conversations...">
+            </div>
+            <div class="chat-list" id="contactsList">
+                {% for contact in contacts %}
+                <div class="chat-item d-flex align-items-center" data-contact-id="{{ contact.id }}" data-contact-name="{{ contact.name }}" onclick="loadConversation('{{ contact.id }}', '{{ contact.name|e }}', this)">
+                    <div class="user-avatar extra-small me-3">{{ contact.name[0] | upper }}</div>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="fw-bold mb-0 small text-truncate">{{ contact.name }}</h6>
+                            <span class="status-indicator status-offline" data-user-id="{{ contact.id }}"></span>
+                        </div>
+                        <p class="extra-small text-muted mb-0 text-truncate">Click to view messages</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-4 text-center text-muted small">No conversations yet. Connect with a mentor to start chatting!</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Chat Main Area -->
+        <div class="chat-main">
+            <div id="noChatSelected" class="h-100 d-flex flex-column align-items-center justify-content-center text-muted p-4 text-center">
+                <i class="fa-solid fa-comments fs-1 mb-3 opacity-25"></i>
+                <p class="mb-0">Select a conversation to start chatting</p>
+            </div>
+
+            <div id="chatActive" class="h-100 d-none flex-column">
+                <div class="chat-header">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar extra-small me-2" id="activeChatAvatar">?</div>
+                        <div class="lh-1">
+                            <h6 class="fw-bold mb-0" id="activeChatName">Loading...</h6>
+                            <span class="extra-small text-muted fw-500" id="activeChatStatus">Direct Message</span>
+                        </div>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('mentorship.my_requests') }}" class="btn btn-light btn-sm rounded-pill px-3" title="Manage Sessions">
+                            <i class="fa-solid fa-video me-1"></i> Sessions
+                        </a>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1 p-4 overflow-y-auto d-flex flex-column" id="msgWindow"></div>
+
+                <div class="p-3 border-top bg-white">
+                    <form id="msgForm" class="d-flex gap-2">
+                        <input type="text" id="msgInput" class="form-control rounded-pill border-0 bg-light px-4" placeholder="Type a message..." autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary rounded-circle shadow-sm" style="width: 45px; height: 45px; flex-shrink: 0;">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let activeRecipientId = null;
+
+    function loadConversation(userId, name, itemEl = null) {
+        activeRecipientId = String(userId);
+        document.getElementById('noChatSelected').classList.add('d-none');
+        const chatActive = document.getElementById('chatActive');
+        chatActive.classList.remove('d-none');
+        chatActive.classList.add('d-flex');
+        document.getElementById('activeChatName').innerText = name;
+        document.getElementById('activeChatAvatar').innerText = (name[0] || '?').toUpperCase();
+
+        document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+        const targetItem = itemEl || document.querySelector(`.chat-item[data-contact-id="${userId}"]`);
+        if (targetItem) targetItem.classList.add('active');
+
+        const msgWindow = document.getElementById('msgWindow');
+        msgWindow.innerHTML = '<div class="text-center py-5 text-muted small">Loading history...</div>';
+
+        fetch(`/api/messages/history/${userId}`)
+            .then(res => res.json())
+            .then(data => {
+                msgWindow.innerHTML = '';
+                if (!data.messages || data.messages.length === 0) {
+                    msgWindow.innerHTML = '<div class="text-center py-5 text-muted small">Say hello to start your skill exchange conversation!</div>';
+                    return;
+                }
+                data.messages.forEach(msg => {
+                    appendMessage(msg.content, msg.sender_id == {{ current_user.id }});
+                });
+                msgWindow.scrollTop = msgWindow.scrollHeight;
+            });
+    }
+
+    function appendMessage(content, isSent) {
+        const msgWindow = document.getElementById('msgWindow');
+        const emptyHint = msgWindow.querySelector('.text-center');
+        if (emptyHint) emptyHint.remove();
+        const div = document.createElement('div');
+        div.className = `msg-bubble animate__animated animate__fadeInUp ${isSent ? 'msg-sent' : 'msg-received'}`;
+        div.innerText = content;
+        msgWindow.appendChild(div);
+        msgWindow.scrollTop = msgWindow.scrollHeight;
+    }
+
+    document.getElementById('msgForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('msgInput');
+        const content = input.value.trim();
+        if (content && activeRecipientId) {
+            socket.emit('send_message', { recipient_id: Number(activeRecipientId), content: content });
+            appendMessage(content, true);
+            input.value = '';
+        }
+    });
+
+    socket.on('receive_message', (data) => {
+        if (String(data.sender_id) === String(activeRecipientId)) {
+            appendMessage(data.content, false);
+        }
+    });
+
+    const searchInput = document.getElementById('contactSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.trim().toLowerCase();
+            document.querySelectorAll('.chat-item').forEach(item => {
+                const name = (item.dataset.contactName || '').toLowerCase();
+                item.style.display = name.includes(term) ? '' : 'none';
+            });
+        });
+    }
+
+    {% if active_contact %}
+    document.addEventListener('DOMContentLoaded', () => {
+        loadConversation('{{ active_contact.id }}', '{{ active_contact.name|e }}');
+    });
+    {% endif %}
+</script>
+{% endblock %}

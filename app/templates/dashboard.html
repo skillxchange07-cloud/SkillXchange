@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-800 mb-1">Welcome back, <span class="text-gradient">{{ current_user.name }}</span>!</h2>
+            <p class="text-muted mb-0">Here's your knowledge exchange activity for today.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-light rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#addWantedSkillModal">
+                <i class="fa-solid fa-bullseye text-primary me-2"></i> Set Goal
+            </button>
+            <a href="{{ url_for('skills.add_skill') }}" class="btn btn-premium shadow-sm rounded-pill px-4">
+                <i class="fa-solid fa-plus me-2"></i> Add Skill
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="row g-4 mb-5">
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-panel p-4 h-100 hover-lift d-flex align-items-center gap-4 border-0">
+                <div class="bg-primary-light rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 65px; height: 65px;">
+                    <i class="fa-solid fa-handshake fs-3 text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-700 text-uppercase letter-spacing-1 mb-1">Total Matches</p>
+                    <h2 class="fw-800 mb-0 lh-1">{{ matches_count or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-panel p-4 h-100 hover-lift d-flex align-items-center gap-4 border-0">
+                <div class="bg-success-light rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 65px; height: 65px;">
+                    <i class="fa-solid fa-video fs-3 text-success"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-700 text-uppercase letter-spacing-1 mb-1">Active Sessions</p>
+                    <h2 class="fw-800 mb-0 lh-1">{{ active_sessions or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-panel p-4 h-100 hover-lift d-flex align-items-center gap-4 border-0">
+                <div class="bg-warning-light rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 65px; height: 65px;">
+                    <i class="fa-solid fa-graduation-cap fs-3 text-warning"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-700 text-uppercase letter-spacing-1 mb-1">Skills Learned</p>
+                    <h2 class="fw-800 mb-0 lh-1">{{ skills_learned or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="glass-panel p-4 h-100 hover-lift d-flex align-items-center gap-4 border-0">
+                <div class="bg-danger-light rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 65px; height: 65px;">
+                    <i class="fa-solid fa-star fs-3 text-danger"></i>
+                </div>
+                <div>
+                    <p class="text-muted small fw-700 text-uppercase letter-spacing-1 mb-1">Avg Rating</p>
+                    <h2 class="fw-800 mb-0 lh-1">{{ avg_rating or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-5">
+        <!-- Main Content Area -->
+        <div class="col-lg-8">
+            
+            <!-- AI Smart Matches -->
+            <div class="card glass-panel border-0 p-4 mb-5 shadow-sm d-none" id="suggestionsCard">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-wand-magic-sparkles text-primary me-2"></i> AI Smart Matches</h5>
+                    <span class="badge bg-primary-light text-primary rounded-pill px-3 py-2 fw-600">Curated for You</span>
+                </div>
+                <div class="row g-4" id="suggestionsContainer">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+
+            <!-- Learning Goals & Expertise (Tabs Style) -->
+            <ul class="nav nav-pills mb-4 gap-2" id="dashboardTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active rounded-pill px-4 fw-600 shadow-sm border border-light" data-bs-toggle="tab" data-bs-target="#teaching">My Mentorships</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link rounded-pill px-4 fw-600 shadow-sm border border-light" data-bs-toggle="tab" data-bs-target="#learning">Learning Goals</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="dashboardTabsContent">
+                <!-- Teaching Tab -->
+                <div class="tab-pane fade show active" id="teaching">
+                    <div class="card glass-panel border-0 p-4 shadow-sm">
+                        {% if current_user.skills %}
+                            <div class="row g-4">
+                                {% for skill in current_user.skills %}
+                                <div class="col-md-6">
+                                    <div class="card h-100 bg-white border border-light shadow-sm p-4 hover-lift rounded-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <span class="badge bg-primary-light text-primary rounded-pill px-3">{{ skill.category }}</span>
+                                            {% if skill.verification_status == 'Approved' %}
+                                                <i class="fa-solid fa-circle-check text-success fs-5" title="Verified"></i>
+                                            {% else %}
+                                                <i class="fa-solid fa-clock text-warning fs-5" title="Pending Verification"></i>
+                                            {% endif %}
+                                        </div>
+                                        <h5 class="fw-bold mb-2">{{ skill.skill_name }}</h5>
+                                        <p class="text-muted small mb-4 text-truncate-2">{{ skill.description }}</p>
+                                        <div class="mt-auto d-flex gap-2">
+                                            <a href="{{ url_for('skills.edit_skill', skill_id=skill.id) }}" class="btn btn-light w-50 rounded-pill small fw-600">Edit</a>
+                                            <a href="{{ url_for('skills.skill_detail', skill_id=skill.id) }}" class="btn btn-outline-primary w-50 rounded-pill small fw-600">Preview</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="bg-light d-inline-flex p-4 rounded-circle mb-3 shadow-sm border">
+                                    <i class="fa-solid fa-chalkboard-user text-muted fs-2"></i>
+                                </div>
+                                <h5 class="fw-bold">No listed skills yet</h5>
+                                <p class="text-muted small mb-4">Share your knowledge with the world to start connecting.</p>
+                                <a href="{{ url_for('skills.add_skill') }}" class="btn btn-premium px-4 rounded-pill">Create Mentorship Profile</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Learning Goals Tab -->
+                <div class="tab-pane fade" id="learning">
+                    <div class="card glass-panel border-0 p-4 shadow-sm">
+                        {% if current_user.wanted_skills %}
+                            <div class="d-flex flex-wrap gap-3">
+                                {% for ws in current_user.wanted_skills %}
+                                    <div class="bg-white border rounded-pill px-4 py-2 d-flex align-items-center shadow-sm hover-lift">
+                                        <i class="fa-solid fa-bookmark text-primary me-2"></i>
+                                        <span class="fw-600 me-3 text-dark">{{ ws.skill_name }}</span>
+                                        <span class="badge bg-light text-muted border me-3">{{ ws.category }}</span>
+                                        <form action="{{ url_for('skills.remove_wanted_skill', ws_id=ws.id) }}" method="POST" class="d-inline m-0">
+                                            <button type="submit" class="btn btn-light btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center text-danger hover-bg-danger transition-all" style="width: 24px; height: 24px; border: none;">
+                                                <i class="fa-solid fa-xmark small"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="bg-light d-inline-flex p-4 rounded-circle mb-3 shadow-sm border">
+                                    <i class="fa-solid fa-bullseye text-muted fs-2"></i>
+                                </div>
+                                <h5 class="fw-bold">Define your goals</h5>
+                                <p class="text-muted small mb-4">Tell us what you want to learn so we can find the perfect mentor.</p>
+                                <button class="btn btn-primary px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#addWantedSkillModal">Set a Learning Goal</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Area -->
+        <div class="col-lg-4">
+            <!-- Learning Activity Chart -->
+            <div class="card glass-panel border-0 mb-5 p-4 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">Learning Velocity</h5>
+                    <i class="fa-solid fa-chart-line text-muted"></i>
+                </div>
+                <div style="height: 200px;">
+                    <canvas id="userActivityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Gamification Badges -->
+            <div class="card glass-panel border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-4">Achievements</h5>
+                {% if current_user.badges %}
+                    <div class="row g-3">
+                        {% for badge in current_user.badges %}
+                            <div class="col-6">
+                                <div class="card h-100 bg-white border-light text-center p-3 shadow-sm hover-lift" title="{{ badge.badge_name }}">
+                                    <div class="bg-warning-light rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm border border-warning text-warning" style="width: 45px; height: 45px;">
+                                        <i class="fa-solid fa-award"></i>
+                                    </div>
+                                    <div class="small fw-700 text-truncate">{{ badge.badge_name }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 bg-light rounded-4 border border-dashed">
+                        <i class="fa-solid fa-medal text-muted fs-3 mb-2 opacity-50"></i>
+                        <p class="text-muted small mb-0">Complete sessions to unlock exclusive reputation badges!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Adding Goals -->
+<div class="modal fade" id="addWantedSkillModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-5 overflow-hidden">
+            <div class="modal-header border-0 p-4 bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-bullseye me-2"></i> Add Learning Goal</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('skills.add_wanted_skill') }}" method="POST">
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-4">Define what you want to learn to power our AI matching algorithm.</p>
+                    
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Skill Name / Topic</label>
+                        <input type="text" name="skill_name" class="form-control form-control-lg bg-light border-0 px-3" placeholder="e.g. Advanced Python, UI/UX Design" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold text-dark">Category</label>
+                        <select name="category" class="form-select form-select-lg bg-light border-0 px-3" required>
+                            <option value="Programming">Programming & Tech</option>
+                            <option value="Design">Design & Creativity</option>
+                            <option value="Business">Business & Management</option>
+                            <option value="Language">Languages</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-600 shadow-sm">Save Goal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .hover-bg-danger:hover {
+        background-color: #ef4444 !important;
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Fetch AI Smart Matches
+        fetch('{{ url_for("mentorship.suggested_matches") }}')
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('suggestionsContainer');
+                const card = document.getElementById('suggestionsCard');
+                if (data.suggestions && data.suggestions.length > 0) {
+                    card.classList.remove('d-none');
+                    data.suggestions.forEach(match => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6';
+                        col.innerHTML = `
+                            <div class="card h-100 bg-white border border-light p-4 hover-lift rounded-4 shadow-sm">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar extra-small shadow-sm me-3" style="width: 40px; height: 40px; border: 2px solid white;">${match.name[0]}</div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark">${match.name}</h6>
+                                            <div class="text-warning extra-small"><i class="fa-solid fa-star"></i> Top Mentor</div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-light text-success rounded-pill px-2 py-1"><i class="fa-solid fa-check"></i> Match</span>
+                                </div>
+                                <p class="small text-muted mb-4"><i class="fa-solid fa-arrow-right-arrow-left text-primary me-2"></i> Exchanges <b>${match.skills_offered[0]}</b> for your wanted skills.</p>
+                                <a href="/mentor_profile/${match.user_id}" class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-600">Connect Now</a>
+                            </div>
+                        `;
+                        container.appendChild(col);
+                    });
+                }
+            })
+            .catch(err => console.log('Error fetching suggestions:', err));
+
+        // Line Chart for Learning Velocity
+        const ctx = document.getElementById('userActivityChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Session Hours',
+                    data: [1.5, 2, 0.5, 3, 2, 4, 1],
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.15)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#4f46e5',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false }, tooltip: { padding: 10, cornerRadius: 8 } },
+                scales: { 
+                    y: { display: false, min: 0 }, 
+                    x: { grid: { display: false }, border: { display: false }, ticks: { font: { family: "'Poppins', sans-serif", size: 11 }, color: '#94a3b8' } } 
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+</script>
+{% endblock %}

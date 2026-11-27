@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Add a New Skill{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-8">
+            <div class="card glass-card border-0 p-5 shadow-sm">
+                <div class="text-center mb-4">
+                    <i class="fa-solid fa-plus-circle text-primary fs-1 mb-2"></i>
+                    <h2 class="fw-bold">Add a New Skill</h2>
+                    <p class="text-muted">Share your expertise! Upload a quick demo video and wait for admin approval.</p>
+                </div>
+                
+                <form method="POST" action="{{ url_for('skills.add_skill') }}" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold">Skill Name</label>
+                            <input type="text" class="form-control" name="skill_name" required placeholder="e.g., Ultimate React.js Mastery">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold">Category</label>
+                            <select class="form-control" name="category" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Programming">Programming</option>
+                                <option value="Design">Design</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Data Science">Data Science</option>
+                                <option value="Business">Business</option>
+                                <option value="Music">Music</option>
+                                <option value="Languages">Languages</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted small fw-bold">Detailed Description</label>
+                            <textarea class="form-control" name="description" rows="5" required placeholder="What will the learner achieve from this?"></textarea>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <label class="form-label text-muted small fw-bold">Upload Demo Video (.mp4, .mov)</label>
+                            <input type="file" class="form-control" name="demo_video" accept="video/mp4,video/x-m4v,video/*" required>
+                            <div class="form-text mt-2"><i class="fa-solid fa-info-circle"></i> Video limit: 50MB. This serves as proof of your ability to the admin and learners.</div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <a href="{{ url_for('auth.dashboard') }}" class="btn btn-light rounded-pill px-4 py-2 me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">Submit for Verification</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}{{ skill.skill_name }} - Details{% endblock %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <div class="mb-4">
+        <a href="{{ url_for('skills.browse_skills') }}" class="text-muted text-decoration-none small fw-600">
+            <i class="fa-solid fa-arrow-left me-2"></i> Back to Exploration
+        </a>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <span class="badge bg-primary-light mb-3 rounded-pill px-3">{{ skill.category }}</span>
+                <h1 class="fw-bold mb-3">{{ skill.skill_name }}</h1>
+                <div class="d-flex align-items-center gap-4 text-muted small">
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-calendar me-2"></i> {{ skill.created_at.strftime('%b %d, %Y') }}
+                    </div>
+                    {% if avg_rating > 0 %}
+                    <div class="text-warning fw-600">
+                        <i class="fa-solid fa-star me-1"></i> {{ avg_rating }} ({{ ratings|length }} reviews)
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card border-0 mb-5 overflow-hidden shadow-sm bg-black" style="border-radius: 20px;">
+                {% if skill.demo_video_path %}
+                <video controls class="w-100" style="max-height: 500px;">
+                    <source src="{{ url_for('static', filename='uploads/' + skill.demo_video_path) }}" type="video/mp4">
+                </video>
+                {% else %}
+                <div class="d-flex align-items-center justify-content-center py-5 bg-light" style="min-height: 300px;">
+                    <div class="text-center opacity-25">
+                        <i class="fa-solid fa-video-slash fs-1"></i>
+                        <p class="mt-2 small mb-0">No demo video provided</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="mb-5">
+                <h5 class="fw-bold mb-4">About this Mentorship</h5>
+                <div class="card border-0 p-4 bg-white">
+                    <p class="text-muted mb-0 lh-lg" style="white-space: pre-wrap;">{{ skill.description }}</p>
+                </div>
+            </div>
+
+            <!-- Reviews & Rating Form -->
+            <div class="mb-5" id="rate-skill">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">Student Feedback</h5>
+                    <span class="badge bg-light text-muted border px-3 rounded-pill">{{ ratings|length }} Reviews</span>
+                </div>
+
+                {% if current_user.is_authenticated and current_user.id != skill.mentor_id %}
+                <div class="card border-0 p-4 mb-4 shadow-sm">
+                    <h6 class="fw-bold mb-3">Leave a Rating &amp; Review</h6>
+                    <form action="{{ url_for('mentorship.submit_rating') }}" method="POST">
+                        <input type="hidden" name="skill_id" value="{{ skill.id }}">
+                        <input type="hidden" name="mentor_id" value="{{ skill.mentor_id }}">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Rating</label>
+                                <select name="rating_value" class="form-select" required>
+                                    <option value="5">5 Stars — Excellent</option>
+                                    <option value="4">4 Stars — Great</option>
+                                    <option value="3">3 Stars — Good</option>
+                                    <option value="2">2 Stars — Fair</option>
+                                    <option value="1">1 Star — Needs Work</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">Your Review</label>
+                                <input type="text" name="review" class="form-control" placeholder="Share how this session helped you..." required>
+                            </div>
+                        </div>
+                        <div class="text-end mt-3">
+                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">Submit Review</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if ratings %}
+                    <div class="row g-3">
+                        {% for r in ratings %}
+                        <div class="col-12">
+                            <div class="card border-0 p-4 hover-lift">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar extra-small me-2" style="width: 35px; height: 35px;">{{ r.rater.name[0] | upper }}</div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 small">{{ r.rater.name }}</h6>
+                                            <div class="text-muted extra-small">{{ r.created_at.strftime('%b %d, %Y') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-warning">
+                                        {% for i in range(r.rating_value) %}<i class="fa-solid fa-star"></i>{% endfor %}
+                                    </div>
+                                </div>
+                                <p class="text-muted small mb-0 fst-italic">"{{ r.review }}"</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="card border-0 p-5 text-center bg-light">
+                        <p class="text-muted small mb-0">No reviews yet. Connect with {{ skill.mentor.name }} and be the first!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="position-sticky" style="top: 100px;">
+                <div class="card border-0 p-4 shadow-sm mb-4">
+                    <div class="text-center mb-4">
+                        <div class="user-avatar shadow-sm mx-auto mb-3" style="width: 70px; height: 70px; font-size: 1.5rem;">
+                            {{ skill.mentor.name[0] | upper }}
+                        </div>
+                        <h6 class="fw-bold mb-1">{{ skill.mentor.name }}</h6>
+                        <p class="text-muted extra-small">Verified Mentor</p>
+                        <a href="{{ url_for('auth.mentor_profile', user_id=skill.mentor_id) }}" class="small fw-600 text-primary text-decoration-none">View Full Profile</a>
+                    </div>
+
+                    <hr class="opacity-10 mb-4">
+
+                    <div class="mb-4">
+                        <div class="d-flex gap-3 mb-3">
+                            <div class="bg-primary-light rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <i class="fa-solid fa-video extra-small"></i>
+                            </div>
+                            <div>
+                                <h6 class="extra-small fw-bold mb-0">Live 1-on-1 Sessions</h6>
+                                <p class="extra-small text-muted mb-0">Via {{ skill.mentor.preferred_mode or 'Video Call' }}</p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <div class="bg-success-light rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                <i class="fa-solid fa-calendar-check extra-small"></i>
+                            </div>
+                            <div>
+                                <h6 class="extra-small fw-bold mb-0">Flexible Scheduling</h6>
+                                <p class="extra-small text-muted mb-0">{{ skill.mentor.availability or 'Discuss after matching' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.id != skill.mentor_id %}
+                        <form action="{{ url_for('mentorship.send_request') }}" method="POST">
+                            <input type="hidden" name="skill_id" value="{{ skill.id }}">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 shadow-sm mb-2">
+                                <i class="fa-solid fa-bolt me-2"></i> Request Connection
+                            </button>
+                        </form>
+                        <a href="{{ url_for('auth.messages', to=skill.mentor_id) }}" class="btn btn-outline-primary w-100 rounded-pill py-2 mb-2 small fw-600">
+                            <i class="fa-solid fa-message me-2"></i> Message Mentor
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('skills.edit_skill', skill_id=skill.id) }}" class="btn btn-outline w-100 rounded-pill py-2 mb-2">
+                            <i class="fa-solid fa-edit me-2"></i> Edit Skill
+                        </a>
+                        {% endif %}
+                        <form action="{{ url_for('mentorship.bookmark_skill', skill_id=skill.id) }}" method="POST">
+                            <button type="submit" class="btn btn-light w-100 rounded-pill py-2 extra-small fw-600">
+                                <i class="fa-heart {% if skill in current_user.bookmarks | map(attribute='skill') %}fa-solid text-danger{% else %}fa-regular{% endif %} me-2"></i> Bookmark Skill
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{{ url_for('auth.login', next=request.url) }}" class="btn btn-primary w-100 rounded-pill py-2 shadow-sm mb-2">
+                            <i class="fa-solid fa-lock me-2"></i> Login to Request
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="card border-0 p-3 bg-light">
+                    <p class="extra-small text-muted mb-0">
+                        <i class="fa-solid fa-shield-halved me-1 text-primary"></i>
+                        Your privacy is protected. Contact details are only shared after both parties agree to match.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

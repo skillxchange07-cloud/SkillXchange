@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container auth-wrapper py-5">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card auth-card border-0">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <i class="fa-solid fa-graduation-cap text-primary fs-1 mb-2"></i>
+                        <h2 class="fw-bold">Welcome Back</h2>
+                        <p class="text-muted">Login to continue your learning journey</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold">Email address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-envelope text-muted"></i></span>
+                                <input type="email" class="form-control border-start-0 ps-0" id="loginEmail" name="email" required placeholder="name@example.com">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                                <input type="password" class="form-control border-start-0 ps-0" id="loginPassword" name="password" required placeholder="••••••••">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                <label class="form-check-label text-muted small" for="remember">Remember me</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm mb-3">Login</button>
+
+                        <div class="text-center text-muted small mb-4">
+                            Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-primary text-decoration-none fw-bold">Sign up here</a>
+                        </div>
+                    </form>
+
+                    <!-- Demo Account Quick-Fill -->
+                    <div class="bg-light rounded-4 p-3 border">
+                        <p class="extra-small text-muted fw-bold text-uppercase mb-2">Demo Accounts (Password: <code>password123</code>)</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="fillDemo('rahul@example.com')">Mentor (Rahul)</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="fillDemo('priya@example.com')">Learner (Priya)</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" onclick="fillDemo('admin@skillxchange.com')">Admin</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fillDemo(email) {
+        document.getElementById('loginEmail').value = email;
+        document.getElementById('loginPassword').value = 'password123';
+    }
+</script>
+{% endblock %}
